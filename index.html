@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./src/style/style.css">
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <title>grit:lab progress graph</title>
+</head>
+<body>
+    <div class="container">
+        <div class="left-half">
+            <div class="info-cell">
+                <p>Welcome to the following user's grit:lab progress report</p>
+                <hr>
+                    <h3>ID: <span id="info-uid"></span></h3>
+                    <h3>Username: <span id="info-login"></span></h3>
+                <hr>
+                <table>
+                    <tbody id="stats"></tbody>
+                </table>
+            </div>
+            <div class="btn-cell">
+                <div id="btnManager">
+                    <button id="get-xp-btn" data-value="xp" data-order="createdAt">Click for Project XP graph</button>
+                    <button id="get-level-btn" data-value="level" data-order="amount">Click for Project level graph</button>
+                </div>
+            </div>
+        </div>
+        <div class="right-half">
+            <div class="graph-cell">    
+                <div id="tooltip" class="hidden">
+                    <p id="tooltip-amount"></p>
+                    <p id="tooltip-event"></p>
+                    <p id="tooltip-date"></p>
+                </div>
+                <p id="graphqlResult">Result</p>
+                <svg id="canvas" viewBox="0 0 100 80" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="100%" height="100%" fill="var(--grey)"></rect>
+                    <path id="path" d="M5 75" fill="transparent" stroke="black" stroke-width="0.3"></path>
+                    <path id="xAxis" d="M5 75 H95" stroke="black" stroke-width="0.3"></path>
+                    <path id="xAxisTextPath" d="M5 79 H95"></path>
+                    <path id="yAxis" d="M5 75 V5" stroke="black" stroke-width="0.3"></path>
+                    <path id="yAxisTextPath" d="M4 75 V5"></path>
+                    <text>
+                        <textPath href="#xAxisTextPath" startOffset="25" id="xAxisText">Over time</textPath>
+                        <textPath href="#yAxisTextPath" startOffset="25" id="yAxisText">Increment</textPath>
+                    </text>
+                    <circle id="indicator" r="1" fill="transparent"></circle>
+                </svg>
+        </div>
+    </div>
+    <script type="module">
+        import { init } from "./src/scripts/script.js"
+        init()
+    </script>
+</body>
+</html>
