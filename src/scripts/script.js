@@ -391,6 +391,10 @@ async function drawGraph(tx, type) {
     });
     canvas.append(division);
   }
+  if (type === "xp") {
+    pathD += ` L95 75`
+    path.setAttribute("fill", "darkgrey")
+  }
   path.setAttribute("d", pathD);
 }
 
@@ -407,4 +411,5 @@ function clearGraph() {
   document.getElementById("tooltip-date").textContent = "";
   const path = document.getElementById("path");
   path.setAttribute("d", "M5 75");
+  path.setAttribute("fill", "transparent")
 }
