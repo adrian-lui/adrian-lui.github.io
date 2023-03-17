@@ -22,8 +22,8 @@ export function init() {
   // add id fetch callback
   document.getElementById("info-uid").addEventListener("change", function (e) {
     if (!Number(this.value) && this.value) {
-        alert(`${this.value} is not a valid ID input.`)
-        return
+      alert(`${this.value} is not a valid ID input.`)
+      return
     }
     variables.uid = this.value
     resetUX()
@@ -35,12 +35,12 @@ export function init() {
 }
 
 function resetUX() {
-    document.getElementById("info-login").textContent = ""
-    document.getElementById("stats").innerHTML = ""
-    document.getElementById("get-xp-btn").disabled = false
-    document.getElementById("get-level-btn").disabled = false
-    document.getElementById("xAxisText").innerHTML = "Over Time"
-    document.getElementById("yAxisText").innerHTML = "Increment"
+  document.getElementById("info-login").textContent = ""
+  document.getElementById("stats").innerHTML = ""
+  document.getElementById("get-xp-btn").disabled = false
+  document.getElementById("get-level-btn").disabled = false
+  document.getElementById("xAxisText").innerHTML = "Over Time"
+  document.getElementById("yAxisText").innerHTML = "Increment"
 }
 
 async function getUserData() {
@@ -62,11 +62,11 @@ async function getUserData() {
     .then((resp) => resp.json())
     .then((json) => json.data.user)
     .then((user) => {
-        if (!user) throw new Error(`user ${variables.uid} does not exist`)
+      if (!user) throw new Error(`user ${variables.uid} does not exist`)
       document.getElementById("info-uid").value = user.id;
       document.getElementById("info-login").textContent = user.login;
     }).catch(e => {
-        alert(e.message)
+      alert(e.message)
     })
 }
 
@@ -166,25 +166,16 @@ async function getStat(tx = [], offset = 0) {
       );
       stats.set(
         "School-curriculum level",
-        tx.find(
-          (entry) => entry.type === "level" && entry.object.type === "project"
-        )?.amount
+        tx.filter(entry => entry.type === "level" && entry.object.type === "project")?.reduce((max, cur) => max = cur.amount > max.amount ? cur : max, { amount: 0 })?.amount
       );
+      console.log()
       stats.set(
         "Piscine-go level",
-        tx.find(
-          (entry) =>
-            entry.type === "level" &&
-            entry.path.startsWith("/gritlab/piscine-go")
-        )?.amount
+        tx.filter((entry) => entry.type === "level" && entry.path.startsWith("/gritlab/piscine-go"))?.reduce((max, cur) => max = cur.amount > max.amount ? cur : max, { amount: 0 })?.amount
       );
       stats.set(
         "Piscine-js level",
-        tx.find(
-          (entry) =>
-            entry.type === "level" &&
-            entry.path.startsWith("/gritlab/school-curriculum/piscine-js/")
-        )?.amount
+        tx.filter((entry) => entry.type === "level" && entry.path.startsWith("/gritlab/school-curriculum/piscine-js/"))?.reduce((max, cur) => max = cur.amount > max.amount ? cur : max, { amount: 0 })?.amount,
       );
       const skills = new Map();
       tx.filter((entry) => entry.type.includes("skill")).map((entry) => {
@@ -231,9 +222,9 @@ async function getStat(tx = [], offset = 0) {
         }
       });
     }).catch(e => {
-        document.getElementById("stats").innerHTML = e.message.includes("cannot access to user")? e.message: "user does not exist"
-        document.getElementById("get-xp-btn").disabled = true
-        document.getElementById("get-level-btn").disabled = true
+      document.getElementById("stats").innerHTML = e.message.includes("cannot access to user") ? e.message : "user does not exist"
+      document.getElementById("get-xp-btn").disabled = true
+      document.getElementById("get-level-btn").disabled = true
     })
 }
 
@@ -297,17 +288,11 @@ async function drawGraph(tx, type) {
   if (!tx.length) {
     alert(`user ${variables.uid} does not have ${type} progress`)
     return
-  }  
+  }
   // graph config
   const canvas = document.getElementById("canvas");
   const canvasWidth = 90;
   const canvasHeight = 70;
-
-  // set tooltip pos
-  const tooltip = document.getElementById("tooltip");
-  const canvasPos = canvas.getBoundingClientRect()
-  tooltip.style.top = canvasPos.top + 10 + "px"
-  tooltip.style.left = canvasPos.left + 40 + "px"
 
   // calculate time lapse and stat
   const firstDate = new Date(tx.at(-1).createdAt);
@@ -385,20 +370,16 @@ async function drawGraph(tx, type) {
       indicator.setAttribute("cy", e.target.dataset.yPos);
       indicator.setAttribute("fill", "black");
 
+      const tooltip = document.getElementById("tooltip");
       tooltip.classList.remove("hidden");
-      document.getElementById("tooltip-amount").innerHTML = `${type}: ${
-        tx.at(i).amount
-      }`;
+      document.getElementById("tooltip-amount").innerHTML = `${type}: ${tx.at(i).amount
+        }`;
       document.getElementById("tooltip-event").innerHTML = tx.at(i).object.name;
       document.getElementById("tooltip-date").innerHTML = new Date(
         tx.at(i).createdAt
       ).toDateString();
     });
     canvas.append(division);
-  }
-  if (type === "xp") {
-    pathD += ` L95 75`
-    path.setAttribute("fill", "darkgrey")
   }
   path.setAttribute("d", pathD);
 }
@@ -416,5 +397,4 @@ function clearGraph() {
   document.getElementById("tooltip-date").textContent = "";
   const path = document.getElementById("path");
   path.setAttribute("d", "M5 75");
-  path.setAttribute("fill", "transparent")
 }
