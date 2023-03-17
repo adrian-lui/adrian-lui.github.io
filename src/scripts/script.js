@@ -303,6 +303,12 @@ async function drawGraph(tx, type) {
   const canvasWidth = 90;
   const canvasHeight = 70;
 
+  // set tooltip pos
+  const tooltip = document.getElementById("tooltip");
+  const canvasPos = canvas.getBoundingClientRect()
+  tooltip.style.top = canvasPos.top + 10 + "px"
+  tooltip.style.left = canvasPos.left + 40 + "px"
+
   // calculate time lapse and stat
   const firstDate = new Date(tx.at(-1).createdAt);
   const lastDate = new Date(tx.at(0).createdAt);
@@ -379,7 +385,6 @@ async function drawGraph(tx, type) {
       indicator.setAttribute("cy", e.target.dataset.yPos);
       indicator.setAttribute("fill", "black");
 
-      const tooltip = document.getElementById("tooltip");
       tooltip.classList.remove("hidden");
       document.getElementById("tooltip-amount").innerHTML = `${type}: ${
         tx.at(i).amount
