@@ -1,20 +1,26 @@
 const uid = 405 // user id for fetching data from api
 const limit = 50 // graphql result limit
 const fetchURL = "https://01.gritlab.ax/api/graphql-engine/v1/graphql" // graphql api
-let userTx = []
+const query = `
+query GetUserByUid($uid: Int!) {
+    user: user_by_pk (id: $uid) {
+        ...getData
+    }
+}`
+
+const variables = { uid }
 
 export function init() {
     // get basic user data
-    getUserData(uid)
-
-    getStat(uid)
+    getUserData()
+    getStat()
 
     // get Tx btn 
     const btnManager = document.getElementById("btnManager")
     btnManager.addEventListener("click", getTx)
 }
 
-async function getUserData(uid) {
+async function getUserData() {
     const fragment = `
     fragment getData on user {
         id
@@ -22,23 +28,16 @@ async function getUserData(uid) {
     }
     `
 
-    const query = `
-    {
-        user: user_by_pk (id: ${uid}) {
-            ...getData
-        }
-    }
-    ${fragment}
-    `
-    
     return await fetch(fetchURL, {
         method: "POST",
         headers: {
             "accept": "application/json",
             "content-type": "application/json",
         },
-        body: JSON.stringify({query})
+        body: JSON.stringify({query: `${query}${fragment}`, variables})
+
     }).then(resp => resp.json()).then(json => {
+        console.log(json)
         return json.data.user
     }).then(user => {
         console.log(user)
@@ -47,7 +46,7 @@ async function getUserData(uid) {
     })
 }
 
-async function getStat(uid, tx = [], offset = 0) {
+async function getStat(tx = [], offset = 0) {
     const fragment = `
     fragment getData on user {
         id
@@ -68,28 +67,19 @@ async function getStat(uid, tx = [], offset = 0) {
     }
     `
 
-    const query = `
-    {
-        user: user_by_pk (id: ${uid}) {
-            ...getData
-        }
-    }
-    ${fragment}
-    `
-    
     await fetch(fetchURL, {
         method: "POST",
         headers: {
             "accept": "application/json",
             "content-type": "application/json",
         },
-        body: JSON.stringify({query})
+        body: JSON.stringify({query: `${query}${fragment}`, variables})
     }).then(resp => resp.json()).then(json => {
         if (json.error) return tx
         
         tx = tx.concat(json.data.user.transactions)
         if (json.data.user.transactions.length === limit) {
-            getStat(uid, tx, tx.length)
+            getStat(tx, tx.length)
         } else {
             return tx
         }
@@ -200,16 +190,7 @@ async function getTx(e) {
         login
         ${txParam}
         ${txReturnValues}
-    }
-    `
-    const query = `
-    {
-        user: user_by_pk (id: ${uid}) {
-            ...getData
-        }
-    }
-    ${fragment}
-    `
+    }`
     
     await fetch(fetchURL, {
         method: "POST",
@@ -217,7 +198,7 @@ async function getTx(e) {
             "accept": "application/json",
             "content-type": "application/json",
         },
-        body: JSON.stringify({query})
+        body: JSON.stringify({query: `${query}${fragment}`, variables})
     }).then(resp => resp.json()).then(json => {
         graphqlResult.innerHTML = `${json.data.user.login}'s ${valueType} progress (last ${json.data.user.transactions.length} changes)`
         drawGraph(json.data.user.transactions, valueType)
